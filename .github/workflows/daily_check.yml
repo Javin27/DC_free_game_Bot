@@ -20,9 +20,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install discord.py aiohttp
+          # We tell it to look inside the GameBot folder
+          pip install -r GameBot/requirements.txt
 
       - name: Run bot script
         env:
           TOKEN: ${{ secrets.DISCORD_TOKEN }}
-        run: python dc_bot_game.py
+        run: |
+          python GameBot/dc_bot_game.py
+
