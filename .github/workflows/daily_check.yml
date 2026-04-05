@@ -1,0 +1,28 @@
+name: Daily Free Game Check
+
+on:
+  schedule:
+    # This runs at 00:00 UTC (5:30 AM IST) every day
+    - cron: '0 0 * * *'
+  workflow_dispatch: # This lets you run it manually to test
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/abstract-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install discord.py aiohttp
+
+      - name: Run bot script
+        env:
+          TOKEN: ${{ secrets.DISCORD_TOKEN }}
+        run: python dc_bot_game.py
