@@ -1,10 +1,12 @@
+import os
 import discord
 from discord.ext import commands, tasks
 import aiohttp
 import asyncio
 
 # --- CONFIGURATION ---
-TOKEN = 'MTQ5MDI0ODgyNDIzOTgyMDkyMA.G1FOWF.2RCXqEL084FNlH98XjPh3dPipUTaR81MX31KfY'  # RESET THIS IN DEV PORTAL IMMEDIATELY!
+# This looks for the 'DISCORD_TOKEN' secret you added in GitHub Settings
+TOKEN = os.getenv('TOKEN') 
 CHANNEL_ID = 1471915660488478877  
 # ---------------------
 
@@ -16,21 +18,21 @@ class GameBot(commands.Bot):
         super().__init__(command_prefix="!", intents=intents)
 
     async def setup_hook(self):
+        # We start the task immediately
         self.check_free_games.start()
-        print("Background task started!")
+        print("Starting the check...")
 
-    @tasks.loop(hours=24)
+    @tasks.loop(count=1) # Run only once, then stop (perfect for GitHub Actions)
     async def check_free_games(self):
         await self.wait_until_ready()
         channel = self.get_channel(CHANNEL_ID)
         
         if not channel:
             print(f"Error: Could not find channel with ID {CHANNEL_ID}")
+            await self.close()
             return
 
         print("Checking for 100% free-to-keep games...")
-        
-        # Added type=game to filter out loot/skins
         api_url = "https://www.gamerpower.com/api/giveaways?type=game"
         
         try:
@@ -41,10 +43,6 @@ class GameBot(commands.Bot):
                         found_any = False
                         
                         for game in data:
-                            # REFINED FILTER:
-                            # 1. Must be on your preferred platforms
-                            # 2. Must be 'Active' (not expired)
-                            # 3. Must NOT be 'N/A' (filters out permanently free-to-play games)
                             platforms = ["PC", "Steam", "Epic Games Store"]
                             is_platform = any(p in game['platforms'] for p in platforms)
                             
@@ -54,13 +52,13 @@ class GameBot(commands.Bot):
                                 embed = discord.Embed(
                                     title=f"FREE: {game['title']}",
                                     description=game['description'],
-                                    color=discord.Color.green(), # Green for freebies
+                                    color=discord.Color.green(),
                                     url=game['open_giveaway_url']
                                 )
                                 embed.set_image(url=game['image'])
                                 embed.add_field(name="Platform", value=game['platforms'], inline=True)
                                 embed.add_field(name="Original Value", value=game['worth'], inline=True)
-                                embed.set_footer(text="Grab it before the deal ends!")
+                                embed.set_footer(text="Check the store to claim!")
                                 
                                 await channel.send(embed=embed)
                                 await asyncio.sleep(1) 
@@ -71,13 +69,15 @@ class GameBot(commands.Bot):
                         print(f"API Error: {response.status}")
         except Exception as e:
             print(f"An error occurred: {e}")
+        
+        # VERY IMPORTANT: This shuts the bot down so the GitHub Action finishes
+        print("Check complete. Closing bot.")
+        await self.close()
 
 bot = GameBot()
 
 @bot.event
 async def on_ready():
-    print(f'--- Bot is Online ---')
     print(f'Logged in as: {bot.user.name}')
-    print('----------------------')
 
 bot.run(TOKEN)
