@@ -6,7 +6,7 @@ import asyncio
 
 # --- CONFIGURATION ---
 # This looks for the 'DISCORD_TOKEN' secret you added in GitHub Settings
-TOKEN = os.getenv('TOKEN') 
+TOKEN = os.getenv('DISCORD_TOKEN') 
 CHANNEL_ID = 1471915660488478877  
 # ---------------------
 
