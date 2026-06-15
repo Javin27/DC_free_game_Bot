@@ -25,7 +25,7 @@ jobs:
 
       - name: Run bot script
         env:
-          TOKEN: ${{ secrets.DISCORD_TOKEN }}
+          # FIXED: This key must match os.getenv('DISCORD_TOKEN') exactly
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
         run: |
           python GameBot/dc_bot_game.py
-
