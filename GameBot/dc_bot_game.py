@@ -4,13 +4,10 @@ import asyncio
 import json
 import os
 import sys
-
-
-  # only matters when running locally; on Actions, the secret is already an env var
-
 token = os.getenv('DISCORD_TOKEN')
 
-CONFIG_FILE = "guild_configs.json"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+CONFIG_FILE = os.path.join(SCRIPT_DIR, "guild_configs.json")
 
 
 def load_configs():
