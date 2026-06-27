@@ -4,9 +4,9 @@ import asyncio
 import json
 import os
 import sys
-from dotenv import load_dotenv
 
-load_dotenv()  # only matters when running locally; on Actions, the secret is already an env var
+
+  # only matters when running locally; on Actions, the secret is already an env var
 
 token = os.getenv('DISCORD_TOKEN')
 
